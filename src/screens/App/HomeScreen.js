@@ -6,10 +6,11 @@ import ActionSheet from "react-native-actions-sheet";
 import DatePicker from 'react-native-modern-datepicker';
 import Toast from '../../components/Toast';
 import { Menu } from 'react-native-paper';
-import axios from 'axios';
 import { useEffect } from 'react';
 import Profile from '../../components/Profile';
 import UIAvatar from '../../components/UIAvatar';
+import WalletApi from '../../store/WalletApi'
+import TransactionApi from '../../store/TransactionApi'
 
 const HomeScreen = ({route, navigation}) => {
   const actionSheetRef = useRef(null);
@@ -75,33 +76,17 @@ const HomeScreen = ({route, navigation}) => {
   }
   
   const addIncome = () => {
-    setTransactions(transactions.concat([
-      {
-        type: 'income',
-        amount: amount,
-        createdAt: selectedDate
-      }
-    ]))
+    TransactionApi.create('income', amount, selectedDate).finally(() => {
+      refreshBalance()
+      refreshTransactions()
+    })
   }
 
-  const addExpense = () => { 
-    setTransactions(transactions.concat([
-      {
-        type: 'expense',
-        amount: amount,
-        createdAt: selectedDate
-      }
-    ]))
-  }
-  
-  function compare(a, b) {
-    if ( a.createdAt > b.createdAt ){
-      return -1;
-    }
-    if ( a.createdAt < b.createdAt ){
-      return 1;
-    }
-    return 0;
+  const addExpense = () => {
+    TransactionApi.create('expense', amount, selectedDate).finally(() => {
+      refreshBalance()
+      refreshTransactions()
+    })
   }
 
   const refreshTransactions = () => {
@@ -118,11 +103,7 @@ const HomeScreen = ({route, navigation}) => {
     setBalanceLoading(true)
     setBalanceMenuVisible(false)
     initBalance().then(r => {
-      var balance = 0;
-      r.data.map((v,i) => {
-        balance += v.amount.number
-      })
-      setBalance(balance)
+      setBalance(r.data.balance)
     }).finally(() => {
       setBalanceLoading(false)
     })
@@ -134,23 +115,23 @@ const HomeScreen = ({route, navigation}) => {
   }, [])
 
   const initTransactions = async () => {
-    return await axios.get('https://getapimaker.com/api/?access_token=a285fec04ce9eabc9362e2b55ae0df6a');
+    return await TransactionApi.getTransactions()
   }
 
   const initBalance = async () => {
-    return await axios.get('https://getapimaker.com/api/?access_token=a285fec04ce9eabc9362e2b55ae0df6a');
+    return await WalletApi.getWallet()
   }
   
   const getTransactions = () => {
     if(Object.keys(transactions).length > 0) {
       return (
-        transactions.sort(compare).map((transaction, i) => {
+        transactions.map((transaction, i) => {
           return (
             <View key={i} style={{flexDirection:'row', alignItems:'center', marginTop:20}}>
-              <Icon color={"#ccc"} name={transaction.type.select.name == 'income' ? 'plus-circle' : 'minus-circle'} type='font-awesome' size={15} style={{paddingRight:10, backgroundColor:'#fff', borderRadius:100}}/>
-              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'bold'}}>{transaction.type.select.name.toUpperCase()} </Text>
-              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'600'}}>{transaction.amount.number} {transaction.currency.select.name} </Text>
-              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontStyle:'italic', fontWeight:'bold'}}>{new Date(transaction.createdAt.created_time).toLocaleString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+              <Icon color={"#ccc"} name={transaction.type == 'income' ? 'plus-circle' : 'minus-circle'} type='font-awesome' size={15} style={{paddingRight:10, backgroundColor:'#fff', borderRadius:100}}/>
+              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'bold'}}>{transaction.type.toUpperCase()} </Text>
+              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'600'}}>{transaction.amount} {transaction.currency} </Text>
+              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontStyle:'italic', fontWeight:'bold'}}>{new Date(transaction.created_at).toLocaleString('en-EN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</Text>
             </View>
           )
         })

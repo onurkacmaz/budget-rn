@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios'
 
-const domain = "https://closet.onurkacmaz.com/";
+const domain = "https://budget.onurkacmaz.com/";
 const baseUrl = domain + "api/"
 const axiosOptions = {
   baseURL: baseUrl,
