@@ -1,40 +1,41 @@
-import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { Icon } from "@rneui/themed";
 import Button from '../../components/Button';
-import ActionSheet from "react-native-actions-sheet";
+import ActionSheet, { useScrollHandlers } from "react-native-actions-sheet";
 import DatePicker from 'react-native-modern-datepicker';
 import Toast from '../../components/Toast';
 import { Menu } from 'react-native-paper';
 import { useEffect } from 'react';
-import Profile from '../../components/Profile';
-import UIAvatar from '../../components/UIAvatar';
 import WalletApi from '../../store/WalletApi'
 import TransactionApi from '../../store/TransactionApi'
+import Header from '../../components/Header';
 
 const HomeScreen = ({route, navigation}) => {
   const actionSheetRef = useRef(null);
-  const profileActionSheetRef = useRef(null)
+  const transactionActionSheetRef = useRef(null);
   const [type, setType] = useState(null)
   const [selectedDate, setSelectedDate] = useState('');
   const [amount, setAmount] = useState(0);
   const [transactions, setTransactions] = useState([])
-  const [status, setStatus] = useState("asdasda")
-  const [message, setMessage] = useState("sd")
+  const [status, setStatus] = useState(null)
+  const [message, setMessage] = useState(null)
   const [visible, setVisible] = useState(false)
   const [balanceMenuVisible, setBalanceMenuVisible] = useState(false)
   const [transactionsMenuVisible, setTransactionsMenuVisible] = useState(false)
   const [balanceLoading, setBalanceLoading] = useState(false)
   const [transactionsLoading, setTransactionsLoading] = useState(false)
   const [balance, setBalance] = useState(0)
+  const [allTransactions, setAllTransactions] = useState([])
+
+  const scrollHandlers = useScrollHandlers(
+    'transactionsActionSheet',
+    transactionActionSheetRef,
+  );
 
   const handleOpenAddIncomeOrExpenseActionSheet = (type) => {
     setType(type);
     actionSheetRef.current?.show();
-  }
-
-  const handleGoProfile = () => {
-    profileActionSheetRef.current?.show()
   }
 
   const handleAction = () => {
@@ -89,10 +90,10 @@ const HomeScreen = ({route, navigation}) => {
     })
   }
 
-  const refreshTransactions = () => {
+  const refreshTransactions = (limit = 20) => {
     setTransactionsLoading(true)
     setTransactionsMenuVisible(false)
-    initTransactions().then(r => {
+    initTransactions(limit).then(r => {
       setTransactions(r.data)
     }).finally(() => {
       setTransactionsLoading(false)
@@ -114,15 +115,15 @@ const HomeScreen = ({route, navigation}) => {
     refreshBalance()
   }, [])
 
-  const initTransactions = async () => {
-    return await TransactionApi.getTransactions()
+  const initTransactions = async (limit) => {
+    return await TransactionApi.getTransactions(limit)
   }
 
   const initBalance = async () => {
     return await WalletApi.getWallet()
   }
   
-  const getTransactions = () => {
+  const RenderTransactions = () => {
     if(Object.keys(transactions).length > 0) {
       return (
         transactions.map((transaction, i) => {
@@ -131,7 +132,31 @@ const HomeScreen = ({route, navigation}) => {
               <Icon color={"#ccc"} name={transaction.type == 'income' ? 'plus-circle' : 'minus-circle'} type='font-awesome' size={15} style={{paddingRight:10, backgroundColor:'#fff', borderRadius:100}}/>
               <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'bold'}}>{transaction.type.toUpperCase()} </Text>
               <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'600'}}>{transaction.amount} {transaction.currency} </Text>
-              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontStyle:'italic', fontWeight:'bold'}}>{new Date(transaction.created_at).toLocaleString('en-EN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</Text>
+              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontStyle:'italic', fontWeight:'bold'}}>{transaction.transaction_date}</Text>
+            </View>
+          )
+        })
+      )
+    }else {
+      return (
+        <View style={{marginTop:20, flexDirection:'row', alignItems:'center'}}>
+          <View style={{width:40, height:40, backgroundColor:'#ccc', borderRadius:100, marginRight:10}}></View>
+          <Text style={{fontSize:16, fontWeight:'400', color:'#666',}}>You dont have any transactions.</Text>
+        </View>
+      )
+    }
+  }
+  
+  const RenderAllTransactions = () => {
+    if(Object.keys(allTransactions).length > 0) {
+      return (
+        allTransactions.map((transaction, i) => {
+          return (
+            <View key={i} style={{flexDirection:'row', alignItems:'center', marginTop:20}}>
+              <Icon color={"#ccc"} name={transaction.type == 'income' ? 'plus-circle' : 'minus-circle'} type='font-awesome' size={15} style={{paddingRight:10, backgroundColor:'#fff', borderRadius:100}}/>
+              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'bold'}}>{transaction.type.toUpperCase()} </Text>
+              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'600'}}>{transaction.amount} {transaction.currency} </Text>
+              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontStyle:'italic', fontWeight:'bold'}}>{transaction.transaction_date}</Text>
             </View>
           )
         })
@@ -146,17 +171,20 @@ const HomeScreen = ({route, navigation}) => {
     }
   }
 
-  const seeAllTransactions = () => { 
+  const seeAllTransactions = () => {
+    transactionActionSheetRef.current?.show()
+    setTransactionsLoading(true)
     setTransactionsMenuVisible(false)
-    navigation.navigate("Transactions")
+    initTransactions().then(r => {
+      setAllTransactions(r.data)
+    }).finally(() => {
+      setTransactionsLoading(false)
+    })
   }
 
   return (
     <View style={styles.container}>
-      <ActionSheet defaultOverlayOpacity={0.60} containerStyle={{height:'95%', paddingTop:20}} ref={profileActionSheetRef} animated={true} gestureEnabled={true}>
-        <Profile navigation={navigation} actionSheet={profileActionSheetRef}/>
-      </ActionSheet>
-      <ActionSheet springOffset={12} defaultOverlayOpacity={0.60} containerStyle={{height:'95%', paddingTop:20}}ref={actionSheetRef} animated={true} gestureEnabled={true}>
+      <ActionSheet defaultOverlayOpacity={0.60} containerStyle={{height:'95%', paddingTop:20}} ref={actionSheetRef} animated={true} gestureEnabled={true}>
         { visible ? <Toast status={status} message={message}/> : null}
         <View style={{padding:30}}>
           <View>
@@ -178,33 +206,26 @@ const HomeScreen = ({route, navigation}) => {
           </View>
         </View>
       </ActionSheet>
-      <View style={styles.header}>
-        <View>
-          <TouchableOpacity onPress={() => handleGoProfile()}>
-            <UIAvatar/>
-          </TouchableOpacity>
+      <ActionSheet ref={transactionActionSheetRef} containerStyle={{height:'100%', paddingTop:20}} animated={true} gestureEnabled={false}>
+        <View style={{padding:30}}>
+          <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'baseline'}}>
+            <Text style={{fontWeight:'bold', fontSize:20}}>Transactions</Text>
+            <TouchableOpacity onPress={() => transactionActionSheetRef.current?.hide()}>
+              <Text style={{fontWeight:'500', fontSize:17, color:'#5CB8E4'}}>Hide</Text>
+            </TouchableOpacity>
+          </View>
+          {
+            transactionsLoading
+            ?
+            <ActivityIndicator animating={transactionsLoading}></ActivityIndicator>
+            : 
+            <ScrollView contentInset={{bottom:40}} style={{marginVertical:20, height:'100%'}} id='transactionsActionSheet' {...scrollHandlers}>
+              <RenderAllTransactions/>
+            </ScrollView>
+          }
         </View>
-        <View style={{justifyContent:'flex-end', flexDirection:'row', flex:1}}>
-          <TouchableOpacity>
-            <Icon
-              padding={10}
-              type='ionicon'
-              name='notifications-outline'
-              size={23}
-              color='#3201ff'
-            />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Icon
-              padding={10}
-              type='ionicon'
-              name='information-circle-outline'
-              size={25}
-              color='#3201ff'
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ActionSheet>
+      <Header navigation={navigation} right={true}/>
       <View style={styles.card}>
           <View style={{justifyContent:'space-between', alignItems:'center', flexDirection:'row'}}>
             <Text style={styles.cardPlaceHolderText}>Available Balance</Text>
@@ -261,12 +282,7 @@ const HomeScreen = ({route, navigation}) => {
               <Menu.Item onPress={() => seeAllTransactions()} title="See All" />
           </Menu>
         </View>
-        {
-          transactionsLoading ? <ActivityIndicator animating={transactionsLoading}></ActivityIndicator> : 
-          <>
-            { getTransactions() }
-          </>
-        }
+        {transactionsLoading ? <ActivityIndicator animating={transactionsLoading}></ActivityIndicator> : <RenderTransactions/>}
       </View>
     </View>
   )
@@ -285,11 +301,6 @@ const styles = StyleSheet.create({
     paddingVertical:0,
     flex: 1,
     backgroundColor: "#f9fbfa", 
-  },
-  header: {
-    marginBottom:10,
-    flexDirection: 'row',
-    alignItems:'center'
   },
   card: {
     backgroundColor: "#fff",

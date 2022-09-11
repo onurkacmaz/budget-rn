@@ -6,7 +6,6 @@ import NotificationsScreen from './NotificationsScreen';
 import SecurityScreen from './SecurityScreen';
 import HelpCenterScreen from './HelpCenterScreen';
 import HomeScreen from './HomeScreen'
-import TransactionsScreen from './TransactionsScreen'
 import { Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 
@@ -21,7 +20,6 @@ const AppStack = () => {
               headerShown:false
             }}>
               <Stack.Screen name="Home" component={HomeScreen} />
-              <Stack.Screen name="Transactions" component={TransactionsScreen} />
               <Stack.Screen name="GeneralSettings" component={GeneralSettingsScreen} />
               <Stack.Screen name="NotificationSettings" component={NotificationsScreen} />
               <Stack.Screen name="SecuritySettings" component={SecurityScreen} />

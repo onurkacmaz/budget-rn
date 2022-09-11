@@ -3,10 +3,10 @@ import config from './Config';
 const instance = config.axiosInstance;
 
 const TransactionApi = {
-	getTransactions: () => {
+	getTransactions: (limit) => {
 		return instance.get('transactions', {
 			params: {
-				limit: 10
+				limit: limit
 			}
 		});
 	},

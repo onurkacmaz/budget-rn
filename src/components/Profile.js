@@ -85,7 +85,7 @@ const Profile = ({navigation, actionSheet}) => {
 					title="Help"
 					description="Help Center"
 					onPress={() => {
-						navigation.navigate("Help")
+						navigation.navigate("HelpCenter")
 						actionSheet.current?.hide()
 					}}
 					left={props => <List.Icon {...props} icon="help-circle" color='#A66CFF' />}
