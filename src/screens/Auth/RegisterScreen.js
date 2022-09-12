@@ -4,14 +4,15 @@ import { AuthContext } from '../../components/context'
 
 const RegisterScreen = () => {
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [phone, setPhone] = useState(null);
   const [password, setPassword] = useState("");
   const [passwordRetry, setPasswordRetry] = useState();
   const { signUp } = useContext(AuthContext)
 
   const handleRegister = () => {
-    signUp(name, email, password, passwordRetry)
+    signUp(name, email, phone, password, passwordRetry)
   }
 
   return (
@@ -23,6 +24,7 @@ const RegisterScreen = () => {
         <View style={styles.inputContainer}>
           <TextInput value={name} onChangeText={name => setName(name)} placeholder='Name' placeholderTextColor={"#666"} style={styles.input} />
           <TextInput value={email} onChangeText={email => setEmail(email)} keyboardType='email-address' placeholder='Email' placeholderTextColor={"#666"} style={styles.input} />
+          <TextInput value={phone} onChangeText={phone => setPhone(phone)} keyboardType='phone-pad' placeholder='Phone' placeholderTextColor={"#666"} style={styles.input} />
           <TextInput value={password} onChangeText={password => setPassword(password)} placeholder='Password' placeholderTextColor={"#666"} style={styles.input} secureTextEntry />
           <TextInput value={passwordRetry} onChangeText={passwordRetry => setPasswordRetry(passwordRetry)} placeholder='Password Retry' placeholderTextColor={"#666"} style={styles.input} secureTextEntry />
         </View>

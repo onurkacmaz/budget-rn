@@ -9,10 +9,11 @@ const AuthApi = {
 			password: password
 		});
 	},
-  register: (name, email, password, passwordConfirmation) => {
+  register: (name, email, phone, password, passwordConfirmation) => {
 		return instance.post('auth/register', {
       name: name,
       email: email,
+      phone: phone,
       password: password,
       password_confirmation: passwordConfirmation,
     });

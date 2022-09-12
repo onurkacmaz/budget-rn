@@ -51,9 +51,9 @@ export default function App() {
         setIsLoading(false)
       })
     },
-    signUp: (name, email, password, passwordConfirmation) => {
+    signUp: (name, email, phone, password, passwordConfirmation) => {
       setIsLoading(true)
-      AuthApi.register(name, email, password, passwordConfirmation)
+      AuthApi.register(name, email, phone, password, passwordConfirmation)
       .then(res => {
         AsyncStorage.setItem('user', JSON.stringify(res.data.data)).then(r => {
           dispatch({type: 'LOGIN', email: email, token: res.data.data.token, id: res.data.data.id})

@@ -77,14 +77,16 @@ const HomeScreen = ({route, navigation}) => {
   }
   
   const addIncome = () => {
-    TransactionApi.create('income', amount, selectedDate).finally(() => {
+    var amountFormatted = amount.replace(",", ".")
+    TransactionApi.create('income', amountFormatted, selectedDate).finally(() => {
       refreshBalance()
       refreshTransactions()
     })
   }
 
   const addExpense = () => {
-    TransactionApi.create('expense', amount, selectedDate).finally(() => {
+    var amountFormatted = amount.replace(",", ".")
+    TransactionApi.create('expense', amountFormatted, selectedDate).finally(() => {
       refreshBalance()
       refreshTransactions()
     })
@@ -98,6 +100,7 @@ const HomeScreen = ({route, navigation}) => {
     }).finally(() => {
       setTransactionsLoading(false)
     })
+    refreshBalance()
   }
 
   const refreshBalance = () => {
@@ -191,7 +194,7 @@ const HomeScreen = ({route, navigation}) => {
             <Text style={{fontWeight:'bold', fontSize:20}}>{type == 'income' ? 'Income' : 'Expense'}</Text>
           </View>
           <View style={{marginTop:20}}>
-            <TextInput onChangeText={amount => setAmount(amount)} placeholder='Amount' keyboardType='number-pad' returnKeyType='done' style={{padding:15, backgroundColor:'#fafbfb', borderWidth:1, borderRadius:10, borderColor:'#ccc'}}></TextInput>
+            <TextInput onChangeText={amount => setAmount(amount)} placeholder='Amount' keyboardType='numeric' returnKeyType='done' style={{padding:15, backgroundColor:'#fafbfb', borderWidth:1, borderRadius:10, borderColor:'#ccc'}}></TextInput>
           </View>
           <DatePicker
             minuteInterval={1}
@@ -264,7 +267,7 @@ const HomeScreen = ({route, navigation}) => {
             </>
           }
       </View>
-      <View style={styles.card}>
+      <View style={[styles.card, {flex:1}]}>
         <View style={{justifyContent:'space-between', alignItems:'center', flexDirection:'row'}}>
           <Text style={styles.cardPlaceHolderText}>Transactions</Text>
           <Menu
@@ -282,7 +285,15 @@ const HomeScreen = ({route, navigation}) => {
               <Menu.Item onPress={() => seeAllTransactions()} title="See All" />
           </Menu>
         </View>
-        {transactionsLoading ? <ActivityIndicator animating={transactionsLoading}></ActivityIndicator> : <RenderTransactions/>}
+        {
+        transactionsLoading 
+        ?
+        <ActivityIndicator animating={transactionsLoading}></ActivityIndicator>
+        :
+        <ScrollView>
+          <RenderTransactions/>
+        </ScrollView>
+        }
       </View>
     </View>
   )
