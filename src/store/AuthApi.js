@@ -29,16 +29,18 @@ const AuthApi = {
       email: email
     });
   },
-  sendVerificationSms: (email, password) => {
+  sendVerificationSms: (email = null, password = null, phone = null) => {
     return instance.post('auth/send-sms-verification-code', {
       email: email,
-      password: password
+      password: password,
+      phone: phone
     });
   },
-  verifySmsCode: (email, smsCode) => {
+  verifySmsCode: (smsCode, email = null, phone = null) => {
     return instance.post('auth/verify-sms-code', {
       email: email,
-      smsCode: smsCode
+      smsCode: smsCode,
+      phone: phone
     });
   }
 }

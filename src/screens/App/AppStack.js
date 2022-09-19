@@ -2,8 +2,8 @@ import { SafeAreaView, StyleSheet } from 'react-native'
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import GeneralSettingsScreen from './GeneralSettingsScreen';
-import NotificationsScreen from './NotificationsScreen';
-import SecurityScreen from './SecurityScreen';
+import NotificationsSettingsScreen from './NotificationsSettingsScreen';
+import SecuritySettingsScreen from './SecuritySettingsScreen';
 import HelpCenterScreen from './HelpCenterScreen';
 import HomeScreen from './HomeScreen'
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -21,8 +21,8 @@ const AppStack = () => {
             }}>
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="GeneralSettings" component={GeneralSettingsScreen} />
-              <Stack.Screen name="NotificationSettings" component={NotificationsScreen} />
-              <Stack.Screen name="SecuritySettings" component={SecurityScreen} />
+              <Stack.Screen name="NotificationSettings" component={NotificationsSettingsScreen} />
+              <Stack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
               <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
             </Stack.Navigator>
           </NavigationContainer>

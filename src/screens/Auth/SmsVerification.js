@@ -1,25 +1,32 @@
 import { Keyboard, View, Text, TouchableWithoutFeedback, KeyboardAvoidingView, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native'
-import React, { useContext, useState } from 'react'
-import { AuthContext } from '../../components/context'
+import React, { useLayoutEffect, useState } from 'react'
 import AuthApi from '../../store/AuthApi'
 import Loader from '../../components/Loader'
+import GoBack from '../../components/GoBack'
 
 const SmsVerification = ({route, navigation}) => {
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      header: () => <GoBack navigation={navigation}/>
+    })
+  }, [])
+
+	const { email, phone, callback } = route.params;
+
 	const [smsCode, setSmsCode] = useState()
-	const { email, password } = route.params;
-  const { signIn } = useContext(AuthContext)
 	const [isLoading, setIsLoading] = useState(false)
 
 	const handleVerifySmsCode = () => {
 		setIsLoading(true)
-		AuthApi.verifySmsCode(email, smsCode)
+		AuthApi.verifySmsCode(smsCode, email, phone)
 		.then(r => {
 			if(r.status === 200) {
-				signIn(email, password)
+				callback()
 			}
 		}).catch(err => {
-			Alert.alert('Usps!', err.response.data.errors.join("\n"))
+			Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
 		})
 		.finally(() => {
 			setIsLoading(false)

@@ -1,8 +1,18 @@
-import { Keyboard, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useContext, useState } from 'react'
+import { Alert, Keyboard, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import React, { useContext, useLayoutEffect, useState } from 'react'
 import { AuthContext } from '../../components/context'
+import GoBack from '../../components/GoBack'
+import AuthApi from '../../store/AuthApi'
+import Loader from '../../components/Loader'
 
-const RegisterScreen = () => {
+const RegisterScreen = ({ navigation }) => {
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      header: () => <GoBack navigation={navigation}/>
+    })
+  }, [])
 
   const [name, setName] = useState(null);
   const [email, setEmail] = useState(null);
@@ -10,14 +20,27 @@ const RegisterScreen = () => {
   const [password, setPassword] = useState("");
   const [passwordRetry, setPasswordRetry] = useState();
   const { signUp } = useContext(AuthContext)
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = () => {
-    signUp(name, email, phone, password, passwordRetry)
+    setIsLoading(true)
+    AuthApi.sendVerificationSms(null, null, phone)
+    .then(r => {
+      navigation.navigate('SmsVerification', {
+        phone: phone,
+        callback: signUp(name, email, phone, password, passwordRetry)
+      })
+    }).catch(err => {
+      Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
+    }).finally(() => {
+      setIsLoading(false)
+    })
   }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
+        <Loader animating={isLoading}/>
         <View style={[styles.inputContainer, {alignItems:'center', marginBottom:10}]}>
           <Text style={{fontSize:30, fontWeight:'800'}}>REGISTER</Text>
         </View>

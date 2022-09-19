@@ -37,7 +37,7 @@ export default function App() {
         })
       })
       .catch(err => {
-        Alert.alert('Usps!', err.response.data.errors.join("\n"))
+        Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
       }).finally(() => {
         setIsLoading(false)
       })
@@ -60,7 +60,7 @@ export default function App() {
         })
       })
       .catch(err => {
-        Alert.alert('Usps!', err.response.data.errors.join("\n"))
+        Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
       })
       .finally(() => {
         setIsLoading(false)
@@ -73,7 +73,7 @@ export default function App() {
         Alert.alert('Usps!', err.response.data.message)
       })
       .catch(err => {
-        Alert.alert('Usps!', err.response.data.errors.join("\n"))
+        Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
       })
       .finally(() => {
         setIsLoading(false)
@@ -107,7 +107,7 @@ export default function App() {
   return (
     <AuthContext.Provider value={authContent}>
 			<Loader animating={isLoading}/>
-      { loginState.token ? (<AppStack />) : (<AuthStack/>)}
+      { loginState.token ? (<AppStack />) : (<AuthStack/>) }
     </AuthContext.Provider>
   );
 }

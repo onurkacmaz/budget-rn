@@ -35,6 +35,10 @@ const Header = (props) => {
 		return NotificationApi.markReadNotifications()
 	}
 
+	const handleOpenInformation = () => {
+		alert("asd");
+	}
+
 	const RenderNotifications = () => {
 		if(Object.keys(notifications).length > 0) {
       return (
@@ -113,7 +117,7 @@ const Header = (props) => {
 								color='#3201ff'
 								/>
 						</TouchableOpacity>
-						<TouchableOpacity>
+						<TouchableOpacity onPress={() => handleOpenInformation()}>
 								<Icon
 								paddingHorizontal={10}
 								type='ionicon'

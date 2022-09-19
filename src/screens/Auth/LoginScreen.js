@@ -1,7 +1,8 @@
 import { Alert, Keyboard, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import AuthApi from '../../store/AuthApi';
 import Loader from '../../components/Loader'
+import { AuthContext } from '../../components/context';
 
 const LoginScreen = ({route, navigation}) => {
 
@@ -9,13 +10,18 @@ const LoginScreen = ({route, navigation}) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const { signIn } = useContext(AuthContext)
+
   const handleSignIn = () => {
     setIsLoading(true)
     AuthApi.sendVerificationSms(email, password)
     .then(r => {
-      navigation.navigate('SmsVerification', {email: email, password: password})
+      navigation.navigate('SmsVerification', {
+        email: email,
+        callback: signIn(email, password)
+      })
     }).catch(err => {
-			Alert.alert('Usps!', err.response.data.errors.join("\n"))
+			Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
 		})
     .finally(() => {
       setIsLoading(false)
