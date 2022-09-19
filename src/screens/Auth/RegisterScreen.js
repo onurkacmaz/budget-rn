@@ -28,7 +28,7 @@ const RegisterScreen = ({ navigation }) => {
     .then(r => {
       navigation.navigate('SmsVerification', {
         phone: phone,
-        callback: signUp(name, email, phone, password, passwordRetry)
+        callback: () => signUp(name, email, phone, password, passwordRetry)
       })
     }).catch(err => {
       Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
@@ -45,8 +45,8 @@ const RegisterScreen = ({ navigation }) => {
           <Text style={{fontSize:30, fontWeight:'800'}}>REGISTER</Text>
         </View>
         <View style={styles.inputContainer}>
-          <TextInput value={name} onChangeText={name => setName(name)} placeholder='Name' placeholderTextColor={"#666"} style={styles.input} />
-          <TextInput value={email} onChangeText={email => setEmail(email)} keyboardType='email-address' placeholder='Email' placeholderTextColor={"#666"} style={styles.input} />
+          <TextInput autoCapitalize='words' value={name} onChangeText={name => setName(name)} placeholder='Name' placeholderTextColor={"#666"} style={styles.input} />
+          <TextInput autoCapitalize='none' value={email} onChangeText={email => setEmail(email)} keyboardType='email-address' placeholder='Email' placeholderTextColor={"#666"} style={styles.input} />
           <TextInput value={phone} onChangeText={phone => setPhone(phone)} keyboardType='phone-pad' placeholder='Phone' placeholderTextColor={"#666"} style={styles.input} />
           <TextInput value={password} onChangeText={password => setPassword(password)} placeholder='Password' placeholderTextColor={"#666"} style={styles.input} secureTextEntry />
           <TextInput value={passwordRetry} onChangeText={passwordRetry => setPasswordRetry(passwordRetry)} placeholder='Password Retry' placeholderTextColor={"#666"} style={styles.input} secureTextEntry />

@@ -16,10 +16,14 @@ const LoginScreen = ({route, navigation}) => {
     setIsLoading(true)
     AuthApi.sendVerificationSms(email, password)
     .then(r => {
-      navigation.navigate('SmsVerification', {
-        email: email,
-        callback: signIn(email, password)
-      })
+      if(r.data.isTwoFactorAuthEnabled) {
+        navigation.navigate('SmsVerification', {
+          email: email,
+          callback: () => signIn(email, password)
+        })
+      }else {
+        signIn(email, password)
+      }
     }).catch(err => {
 			Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
 		})
@@ -36,16 +40,13 @@ const LoginScreen = ({route, navigation}) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
         <Loader animating={isLoading}/>
-        <View style={[styles.inputContainer, {alignItems:'center', marginBottom:10}]}>
-          <Text style={{fontSize:30, fontWeight:'800'}}>LOGIN</Text>
-        </View>
         <View style={styles.inputContainer}>
-          <TextInput value={email} onChangeText={email => setEmail(email)} keyboardType='email-address' placeholder='Email' placeholderTextColor={"#666"} style={styles.input} />
+          <TextInput autoCapitalize="none" value={email} onChangeText={email => setEmail(email)} keyboardType='email-address' placeholder='Email' placeholderTextColor={"#666"} style={styles.input} />
           <TextInput value={password} onChangeText={password => setPassword(password)} placeholder='Password' placeholderTextColor={"#666"} style={styles.input} secureTextEntry />
         </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={() => handleSignIn()} style={styles.button}>
-          <Text style={styles.buttonText}>Login</Text>
+            <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigateToRegisterScreen()} style={[styles.button, styles.buttonOutline]}>
             <Text style={styles.buttonOutlineText}>Register</Text>
