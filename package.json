@@ -28,6 +28,7 @@
     "react-native-modern-datepicker": "^1.0.0-beta.91",
     "react-native-paper": "^5.0.0-rc.4",
     "react-native-screens": "~3.15.0",
+    "react-native-sms-verifycode": "^2.4.3",
     "react-native-web": "~0.18.7"
   },
   "devDependencies": {

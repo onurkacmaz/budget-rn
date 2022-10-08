@@ -1,4 +1,4 @@
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { Icon } from "@rneui/themed";
 import Button from '../../components/Button';
@@ -125,6 +125,23 @@ const HomeScreen = ({route, navigation}) => {
   const initBalance = async () => {
     return await WalletApi.getWallet()
   }
+
+  const deleteAllTransactions = () => {
+    TransactionApi.deleteAll().then(r => {
+      if(r.status == 204) {
+        refreshTransactions()
+      }
+    })
+  }
+  
+  const deleteTransaction = (id) => {
+    TransactionApi.delete(id).then(r => {
+      if(r.status == 204) {
+        seeAllTransactions()
+        refreshTransactions()
+      }
+    })
+  }
   
   const RenderTransactions = () => {
     if(Object.keys(transactions).length > 0) {
@@ -149,18 +166,33 @@ const HomeScreen = ({route, navigation}) => {
       )
     }
   }
+
+  const handleOpenTransactionActions = (id) => {
+    Alert.alert("Actions", null, [
+      {
+        text: 'Delete',
+        onPress: () => deleteTransaction(id)
+      },
+      {
+        text: 'Cancel',
+        style: 'destructive'
+      }
+    ])
+  }
   
   const RenderAllTransactions = () => {
     if(Object.keys(allTransactions).length > 0) {
       return (
         allTransactions.map((transaction, i) => {
           return (
-            <View key={i} style={{flexDirection:'row', alignItems:'center', marginTop:20}}>
-              <Icon color={"#ccc"} name={transaction.type == 'income' ? 'plus-circle' : 'minus-circle'} type='font-awesome' size={15} style={{paddingRight:10, backgroundColor:'#fff', borderRadius:100}}/>
-              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'bold'}}>{transaction.type.toUpperCase()} </Text>
-              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'600'}}>{transaction.amount} {transaction.currency} </Text>
-              <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontStyle:'italic', fontWeight:'bold'}}>{transaction.transaction_date}</Text>
-            </View>
+            <TouchableOpacity key={i} onLongPress={() => handleOpenTransactionActions(transaction.id)}>
+              <View style={{flexDirection:'row', alignItems:'center', marginTop:20}}>
+                <Icon color={"#ccc"} name={transaction.type == 'income' ? 'plus-circle' : 'minus-circle'} type='font-awesome' size={15} style={{paddingRight:10, backgroundColor:'#fff', borderRadius:100}}/>
+                <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'bold'}}>{transaction.type.toUpperCase()} </Text>
+                <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontWeight:'600'}}>{transaction.amount} {transaction.currency} </Text>
+                <Text style={{fontSize:16, fontWeight:'400', color:'#666', fontStyle:'italic', fontWeight:'bold'}}>{transaction.transaction_date}</Text>
+              </View>
+            </TouchableOpacity>
           )
         })
       )
@@ -282,7 +314,15 @@ const HomeScreen = ({route, navigation}) => {
                 <Icon name='dots-three-horizontal' type='entypo' color={"#A66CFF"}/>
               </TouchableOpacity>}>
               <Menu.Item onPress={() => refreshTransactions()} title="Refresh" />
-              <Menu.Item onPress={() => seeAllTransactions()} title="See All" />
+              { 
+                Object.keys(transactions).length > 0 ? 
+                <>
+                <Menu.Item onPress={() => seeAllTransactions()} title="See All" />
+                <Menu.Item onPress={() => deleteAllTransactions()} title="Delete All" /> 
+                </>
+                :
+                null
+              }
           </Menu>
         </View>
         {

@@ -28,7 +28,9 @@ const RegisterScreen = ({ navigation }) => {
     .then(r => {
       navigation.navigate('SmsVerification', {
         phone: phone,
-        callback: () => signUp(name, email, phone, password, passwordRetry)
+        callback: () => {
+          signUp(name, email, phone, password, passwordRetry)
+        }
       })
     }).catch(err => {
       Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)

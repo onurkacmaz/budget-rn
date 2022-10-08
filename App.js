@@ -15,18 +15,14 @@ export default function App() {
     name: null,
     email: null,
     token: null,
-    isLoading: true,
+    isLoading: false,
   }
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const [loginState, dispatch] = useReducer(loginReducer, initialLoginState)
 
   const authContent = useMemo(() => ({
     signIn: (email, password) => {
-      setIsLoading(true)
-      AuthApi.login(email, password)
-      .then(res => {
+      AuthApi.login(email, password).then(res => {
         AsyncStorage.setItem('user', JSON.stringify(res.data.data)).then(r => {
           dispatch({
             type: 'LOGIN', 
@@ -38,21 +34,14 @@ export default function App() {
       })
       .catch(err => {
         Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
-      }).finally(() => {
-        setIsLoading(false)
       })
     },
     signOut: () => {
-      setIsLoading(true)
       AsyncStorage.removeItem('user').then(r => {
         dispatch({type: 'LOGOUT'})
       })
-      .finally(() => {
-        setIsLoading(false)
-      })
     },
     signUp: (name, email, phone, password, passwordConfirmation) => {
-      setIsLoading(true)
       AuthApi.register(name, email, phone, password, passwordConfirmation)
       .then(res => {
         AsyncStorage.setItem('user', JSON.stringify(res.data.data)).then(r => {
@@ -62,21 +51,14 @@ export default function App() {
       .catch(err => {
         Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
       })
-      .finally(() => {
-        setIsLoading(false)
-      })
     },
     resetPassword: (email) => {
-      setIsLoading(true)
       AuthApi.sendResetPasswordEmail(email)
       .then(res => {
         Alert.alert('Usps!', err.response.data.message)
       })
       .catch(err => {
         Alert.alert('Usps!', err?.response?.data?.errors?.join("\n") ?? err.message)
-      })
-      .finally(() => {
-        setIsLoading(false)
       })
     },
     retrieveToken: () => {
@@ -106,7 +88,7 @@ export default function App() {
   
   return (
     <AuthContext.Provider value={authContent}>
-			<Loader animating={isLoading}/>
+			<Loader animating={loginState.isLoading}/>
       { loginState.token ? (<AppStack />) : (<AuthStack/>) }
     </AuthContext.Provider>
   );

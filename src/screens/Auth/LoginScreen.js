@@ -16,10 +16,12 @@ const LoginScreen = ({route, navigation}) => {
     setIsLoading(true)
     AuthApi.sendVerificationSms(email, password)
     .then(r => {
-      if(r.data.isTwoFactorAuthEnabled) {
+      if(r.data.isTwoFactorAuthEnabled == undefined) {
         navigation.navigate('SmsVerification', {
           email: email,
-          callback: () => signIn(email, password)
+          callback: () => {
+            signIn(email, password)
+          }
         })
       }else {
         signIn(email, password)

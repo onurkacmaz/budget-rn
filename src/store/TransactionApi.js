@@ -16,6 +16,12 @@ const TransactionApi = {
 			amount: amount,
 			date: date
 		});
+	},
+	delete: (id) => {
+		return instance.delete('transactions/' + id);
+	},
+	deleteAll: () => {
+		return instance.delete('transactions');
 	}
 }
 

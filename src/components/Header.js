@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import UIAvatar from './UIAvatar'
 import { Icon } from '@rneui/base'
 import ActionSheet from 'react-native-actions-sheet'
@@ -12,6 +12,7 @@ const Header = (props) => {
   const notificationsActionSheetRef = useRef(null);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
 	const [notifications, setNotifications] = useState([])
+	const [hasNewNotifications, setHasNewNotifications] = useState(false)
 	
   const handleGoProfile = () => {
     profileActionSheetRef.current?.show()
@@ -29,6 +30,7 @@ const Header = (props) => {
 	const handleOpenNotifications = () => {
 		notificationsActionSheetRef.current?.show()
 		refreshNotifications()
+		markReadNotifications()
 	}
 
 	const markReadNotifications = async () => {
@@ -72,7 +74,7 @@ const Header = (props) => {
 
   return (
     <View style={styles.header}>
-			<ActionSheet defaultOverlayOpacity={0.60} containerStyle={{height:'95%', paddingTop:20}} ref={profileActionSheetRef} animated={true} gestureEnabled={true}>
+			<ActionSheet defaultOverlayOpacity={0.60} containerStyle={{ paddingTop:20}} ref={profileActionSheetRef} animated={true} gestureEnabled={true}>
 				<Profile navigation={navigation} actionSheet={profileActionSheetRef}/>
 			</ActionSheet>
       <ActionSheet ref={notificationsActionSheetRef} containerStyle={{height:'100%', paddingTop:20}} animated={true} gestureEnabled={false}>
@@ -88,9 +90,7 @@ const Header = (props) => {
 							<RefreshControl
 								refreshing={notificationsLoading}
 								onRefresh={() => {
-									markReadNotifications().finally(() => {
-										refreshNotifications()
-									})
+									refreshNotifications()
 								}}
 							/>
 						}>
@@ -116,6 +116,12 @@ const Header = (props) => {
 								size={23}
 								color='#3201ff'
 								/>
+								{
+									hasNewNotifications ? 
+									<View style={{position:'absolute', right:-10, top:-15}}>
+										<Icon name='dot' type='octicon' color={"#f00"} paddingRight={10} size={28}/>
+									</View> : null
+								}
 						</TouchableOpacity>
 						<TouchableOpacity onPress={() => handleOpenInformation()}>
 								<Icon
